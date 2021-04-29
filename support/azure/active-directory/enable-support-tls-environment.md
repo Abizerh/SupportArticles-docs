@@ -30,9 +30,10 @@ To maintain a secure connection to Azure Active Directory (Azure AD) and Microso
 ### Guidelines for enabling TLS 1.2 on clients
 
 - Update Windows and the default TLS that you use for "WinHTTP."
-- Identify and reduce you dependency on the client apps that don’t support TLS 1.2.
+- Identify and reduce you dependency on the client apps/OS that don’t support TLS 1.2.
 - Enable TLS 1.2 on common server roles that communicate with Azure AD.
 - Update and configure your .NET Framework installation to support TLS 1.2.
+- Ensure Applications, Powershell utilizing Azure AD Graph (https://graph.windows.net) and Microsoft Graph (https://graph.microsoft.com) are hosted/run on a platform that supports TLS 1.2.
 - Make sure that you use the latest updated browser. We recommend that you use the new Microsoft Edge browser (based on Google Chromium). For more information, see the [Microsoft Edge release notes for Stable Channel](https://docs.microsoft.com/deployedge/microsoft-edge-relnote-stable-channel).
 - Make sure that your web proxy supports TLS 1.2. For more information about how to update a web proxy, check with the vendor of your app proxy solution.
 
@@ -43,9 +44,9 @@ For more information, see the following articles:
 
 ### Native support for Windows operating systems and servers
 
-Windows 8.1, Windows Server 2012 R2, Windows 10, Windows Server 2016, and later versions of Windows natively support TLS 1.2 for client-server communications over WinHTTP.
+Windows 8.1, Windows Server 2012 R2, Windows 10, Windows Server 2016, and later versions of Windows natively support TLS 1.2 for client-server communications over WinHTTP. Ensure you have not explicitly disabled TLS 1.2 on this platforms.
 
-By default, earlier versions of Windows, such as Windows 7 and Windows Server 2008, don't enable TLS 1.2 or TLS 1.1 for secure communications by using WinHTTP. For these earlier versions of Windows, install [Update 3140245](https://support.microsoft.com/help/3140245) to enable the registry values from the [Enable TLS 1.2](#enable-tls-12) section. You can configure those values to add TLS 1.2 and TLS 1.1 to the default secure protocols list for WinHTTP.
+By default, earlier versions of Windows, such as Windows 7 and Windows Server 2012, don't enable TLS 1.2 or TLS 1.1 for secure communications by using WinHTTP. For these earlier versions of Windows, install [Update 3140245](https://support.microsoft.com/help/3140245) to enable the registry values from the [Enable TLS 1.2](#enable-tls-12) section. You can configure those values to add TLS 1.2 and TLS 1.1 to the default secure protocols list for WinHTTP.
 
 For more information, see [How to enable TLS 1.2 on clients](https://docs.microsoft.com/mem/configmgr/core/plan-design/security/enable-tls-1-2-client).
 
@@ -63,15 +64,19 @@ For more information, see [Handshake Simulation for various clients connecting t
 
 ### Enable TLS 1.2 common server roles that communicate with Azure AD
 
-Although TLS 1.2 is enabled by default on the supported Windows versions, you may want to explicitly add the registry values from the "[Enable TLS 1.2"](#enable-tls-12) section on the Windows server roles that interacting with Azure AD, such as the following:
+Although TLS 1.2 is enabled by default on the supported Windows versions above Windows 2012 R2, **you may want to explicitly add the registry values from the "[Enable TLS 1.2"](#enable-tls-12) section on the Windows server roles that interacting with Azure AD, such as the following:**
 
-- Azure AD Connect (version 1.4.38.0 and later enforce TLS 1.2) 
-- Azure AD Connect Authentication Agent (pass-through authentication) (version 1.5.643.0 and later)
+- Azure AD Connect (version 1.4.38.0 and later enforce TLS 1.2)
+ 
+  *If you also want to enable TLS 1.2 between the sync engine server and a remote SQL Server, make sure you have the required versions installed for [TLS 1.2 support for Microsoft SQL Server](https://support.microsoft.com/en-us/topic/kb3135244-tls-1-2-support-for-microsoft-sql-server-e4472ef8-90a9-13c1-e4d8-44aad198cdbe)
+- Azure AD Connect Authentication Agent (pass-through authentication) (version 1.5.643.0 and later enforce TLS 1.2)
 - Azure Application Proxy (version 1.5.1526.0 and later enforce TLS 1.2)
 - Active Directory Federation Services (AD FS) for servers that are configured to use Azure Multi-Factor Authentication (Azure MFA)
 - NPS servers that are configured to use the NPS extension for Azure AD MFA
+- MFA Server version 8.x or higher
+- Azure AD Password Protection proxy service 
 
-Also, make sure that you are running a recent version of the agent, service, or connector.
+Also, **make sure that you are running a recent version of the agent, service, or connector**.
 
 For more information, see the following articles:
 
@@ -100,7 +105,7 @@ To enable TLS 1.2, use the PowerShell script that's provided in [TLS 1.2 enforce
 
 ### Update and configure .NET Framework to support TLS 1.2
 
-Dependencies may include managed applications and Windows PowerShell scripts using .NET Framework.
+Dependencies may include managed applications and Windows PowerShell scripts (utilizing Azure AD powershell V1 (msonline), V2 (AzureAD), MIcrosoft graph (https://graph.microsoft.com)) using .NET Framework.
 
 #### Install .NET updates to enable strong cryptography
 
@@ -114,7 +119,7 @@ Use these guidelines:
 
   For more information, see [.NET Framework versions and dependencies](https://docs.microsoft.com/dotnet/framework/migration-guide/versions-and-dependencies).
 
-- If you're using .NET Framework 4.5.2 or 4.5.1 on Windows 8.1 or Windows Server 2012, the relevant updates and details are also available from the [Microsoft Download Center](https://www.microsoft.com/download/details.aspx?id=42883).
+- If you're using .NET Framework 4.5.2 or 4.5.1 on Windows 8.1 or Windows Server 2012, the relevant updates and details are also available from the [Microsoft Download Center](https://www.microsoft.com/download/details.aspx?id=42883). also see Microsoft Security Advisory 2960358.
 
 Set the following registry DWORD values  on any computer that communicates across the network and runs a TLS 1.2-enabled system. For example, set these values on Configuration Manager clients, remote site system roles that are not installed on the site server, and the site server itself.
 
